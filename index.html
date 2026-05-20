@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>АвтоАксессуары — Журнал продаж</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F6FA;--surface:#fff;--s2:#F0F3F8;
+  --blue:#2563EB;--bl:#EFF6FF;
+  --green:#059669;--gl:#ECFDF5;
+  --red:#DC2626;--rl:#FEF2F2;
+  --text:#111827;--t2:#6B7280;--t3:#9CA3AF;
+  --brd:#E5E7EB;--r:12px;--rs:8px;
+  --sh:0 1px 3px rgba(0,0,0,.08);--shm:0 4px 12px rgba(0,0,0,.12)
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{background:var(--blue);color:#fff;padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-title{font-size:17px;font-weight:700}
+.topbar-sub{font-size:11px;opacity:.8;margin-top:2px}
+.sync-btn{background:rgba(255,255,255,.2);border:none;border-radius:var(--rs);padding:7px 11px;color:#fff;font-size:12px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.sync-btn svg{width:14px;height:14px;flex-shrink:0}
+
+/* LAYOUT */
+.content{flex:1;padding:12px;padding-bottom:80px;overflow-y:auto}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--surface);border-top:1px solid var(--brd);display:grid;grid-template-columns:repeat(4,1fr);z-index:100}
+.nb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 10px;border:none;background:none;cursor:pointer;color:var(--t2);font-size:10px;font-family:inherit;font-weight:600;transition:color .15s}
+.nb svg{width:22px;height:22px}
+.nb.on{color:var(--blue)}
+.sec{display:none}.sec.on{display:block}
+
+/* CARDS */
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--brd);padding:14px 16px;margin-bottom:12px;box-shadow:var(--sh)}
+.ct{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.st{background:var(--surface);border:1px solid var(--brd);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh)}
+.sl{font-size:11px;color:var(--t2);font-weight:600;margin-bottom:4px}
+.sv{font-size:18px;font-weight:700;color:var(--text)}
+.sv.blue{color:var(--blue)}.sv.green{color:var(--green)}
+
+/* ROWS */
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--brd)}
+.row:last-child{border-bottom:none}
+.ico{width:36px;height:36px;border-radius:var(--rs);background:var(--bl);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ico svg{width:18px;height:18px;color:var(--blue)}
+.rinfo{flex:1;min-width:0}
+.rname{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rmeta{font-size:11px;color:var(--t2);margin-top:1px}
+.rright{text-align:right;flex-shrink:0}
+.rprice{font-size:13px;font-weight:700}
+.rprofit{font-size:11px;color:var(--green);font-weight:600;margin-top:1px}
+.empty{font-size:13px;color:var(--t3);text-align:center;padding:24px 0}
+
+/* FORMS */
+.fl{font-size:12px;color:var(--t2);font-weight:600;margin-bottom:5px;display:block}
+.fg{margin-bottom:12px;position:relative}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input{width:100%;padding:10px 12px;border:1.5px solid var(--brd);border-radius:var(--rs);font-size:14px;font-family:inherit;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s}
+input:focus{border-color:var(--blue)}
+input[readonly]{background:var(--s2);color:var(--t2)}
+.pv-box{background:var(--gl);border:1px solid #A7F3D0;border-radius:var(--rs);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.pv-label{font-size:12px;color:var(--green);font-weight:600}
+.pv-val{font-size:16px;font-weight:700;color:var(--green)}
+
+/* BUTTONS */
+.btn{width:100%;padding:12px;border:none;border-radius:var(--rs);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:transform .1s,opacity .15s}
+.btn:active{transform:scale(.98);opacity:.88}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-outline{background:none;color:var(--blue);border:2px solid var(--blue)}
+.del-btn{background:none;border:none;cursor:pointer;color:var(--t3);padding:5px;border-radius:4px;flex-shrink:0;transition:color .15s,background .15s}
+.del-btn:active{color:var(--red);background:var(--rl)}
+.del-btn svg{width:16px;height:16px;display:block}
+
+/* AUTOCOMPLETE */
+.ac-wrap{position:relative;z-index:20}
+.ac-drop{background:var(--surface);border:1.5px solid var(--blue);border-radius:var(--rs);margin-top:3px;overflow:hidden;display:none;box-shadow:var(--shm)}
+.ac-drop.show{display:block}
+.ac-item{padding:10px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--brd);transition:background .1s}
+.ac-item:last-child{border-bottom:none}
+.ac-item:active{background:var(--bl)}
+.ac-item strong{color:var(--blue)}
+.ac-sub{font-size:11px;color:var(--t2);margin-top:1px}
+
+/* BADGE */
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;background:var(--bl);color:var(--blue)}
+
+/* USER SELECT */
+.user-wrap{display:flex;gap:6px;margin-bottom:12px}
+.user-btn{flex:1;padding:8px 4px;border:1.5px solid var(--brd);border-radius:var(--rs);background:none;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--t2);transition:all .15s}
+.user-btn.on{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:200;pointer-events:none}
+.toast{background:#1F2937;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:opacity .25s;white-space:nowrap;font-family:'Nunito',sans-serif}
+.toast.show{opacity:1}
+
+/* ADD PRODUCT — fixed at top */
+.add-prod-panel{background:var(--bl);border:1.5px solid var(--blue);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;display:none}
+.add-prod-panel.show{display:block}
+.add-prod-title{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:12px}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
+.filter-bar::-webkit-scrollbar{display:none}
+.fb-btn{white-space:nowrap;padding:6px 14px;border:1.5px solid var(--brd);border-radius:20px;background:none;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;color:var(--t2);flex-shrink:0;transition:all .15s}
+.fb-btn.on{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* DATE JOURNAL */
+.date-block{margin-bottom:12px}
+.date-hdr{background:var(--blue);color:#fff;border-radius:var(--rs) var(--rs) 0 0;padding:9px 13px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+.date-hdr-l{font-size:13px;font-weight:700}
+.date-hdr-r{font-size:11px;opacity:.85}
+.date-body{background:var(--surface);border:1px solid var(--brd);border-top:none;border-radius:0 0 var(--rs) var(--rs);display:none}
+.date-body.open{display:block}
+.date-stats{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--brd)}
+.ds{padding:9px 8px;text-align:center;border-right:1px solid var(--brd)}
+.ds:last-child{border-right:none}
+.ds-l{font-size:10px;color:var(--t2);font-weight:600;margin-bottom:2px}
+.ds-v{font-size:13px;font-weight:700}
+.ds-v.blue{color:var(--blue)}.ds-v.green{color:var(--green)}
+.ds-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--brd)}
+.ds-row:last-child{border-bottom:none}
+.ds-info{flex:1;min-width:0}
+.ds-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ds-meta{font-size:10px;color:var(--t2);margin-top:1px}
+.ds-right{text-align:right;flex-shrink:0;margin-right:4px}
+.ds-price{font-size:12px;font-weight:700}
+.ds-profit{font-size:10px;color:var(--green);font-weight:600}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">АвтоАксессуары</div>
+      <div class="topbar-sub" id="today-label"></div>
+    </div>
+    <button class="sync-btn" onclick="syncNow()" id="sync-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+      Обновить
+    </button>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ ГЛАВНАЯ ══ -->
+    <div class="sec on" id="s-home">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:12px;color:var(--t2);font-weight:600;white-space:nowrap">Вы:</span>
+        <div class="user-wrap" style="margin:0;flex:1">
+          <button class="user-btn on" onclick="setUser('Абыл',this)">Абыл</button>
+          <button class="user-btn"    onclick="setUser('Марат',this)">Марат</button>
+          <button class="user-btn"    onclick="setUser('Менеджер',this)">Менеджер</button>
+        </div>
+      </div>
+      <div class="sg">
+        <div class="st"><div class="sl">Выручка сегодня</div><div class="sv blue" id="h-rev">—</div></div>
+        <div class="st"><div class="sl">Прибыль сегодня</div><div class="sv green" id="h-profit">—</div></div>
+        <div class="st"><div class="sl">Продаж</div><div class="sv" id="h-cnt">—</div></div>
+        <div class="st"><div class="sl">Маржа</div><div class="sv" id="h-margin">—</div></div>
+      </div>
+      <div class="card">
+        <div class="ct">Последние продажи</div>
+        <div id="recent-list"><div class="empty">Нет продаж</div></div>
+      </div>
+    </div>
+
+    <!-- ══ ПРОДАЖА ══ -->
+    <div class="sec" id="s-sale">
+      <div class="card">
+        <div class="ct">Новая продажа</div>
+        <div class="fg ac-wrap">
+          <label class="fl">Наименование товара</label>
+          <input type="text" id="f-search" placeholder="Начните вводить название..."
+            autocomplete="off" oninput="onSearch()" onfocus="onSearch()">
+          <div class="ac-drop" id="ac-list"></div>
+        </div>
+        <div class="fr">
+          <div class="fg">
+            <label class="fl">Количество</label>
+            <input type="number" id="f-qty" value="1" min="1" oninput="calcPreview()">
+          </div>
+          <div class="fg">
+            <label class="fl">Цена со скидкой</label>
+            <input type="number" id="f-disc" placeholder="необязательно" oninput="calcPreview()">
+          </div>
+        </div>
+        <div class="fr">
+          <div class="fg">
+            <label class="fl">Цена продажи</label>
+            <input type="number" id="f-price" readonly>
+          </div>
+          <div class="fg">
+            <label class="fl">Себестоимость</label>
+            <input type="number" id="f-cost" readonly>
+          </div>
+        </div>
+        <div class="pv-box">
+          <span class="pv-label">Прибыль с продажи</span>
+          <span class="pv-val" id="f-prev">0 сом</span>
+        </div>
+        <button class="btn btn-primary" onclick="addSale()">✓ Записать продажу</button>
+      </div>
+    </div>
+
+    <!-- ══ ОТЧЁТ ══ -->
+    <div class="sec" id="s-rep">
+      <div class="filter-bar">
+        <button class="fb-btn on" onclick="setFilter('today',this)">Сегодня</button>
+        <button class="fb-btn"    onclick="setFilter('week',this)">7 дней</button>
+        <button class="fb-btn"    onclick="setFilter('month',this)">30 дней</button>
+        <button class="fb-btn"    onclick="setFilter('all',this)">Всё время</button>
+      </div>
+      <div class="sg">
+        <div class="st"><div class="sl">Выручка</div><div class="sv blue" id="r-rev">—</div></div>
+        <div class="st"><div class="sl">Прибыль</div><div class="sv green" id="r-prof">—</div></div>
+      </div>
+      <div class="card">
+        <div class="ct">По продавцам</div>
+        <div id="r-sellers"><div class="empty">Нет данных</div></div>
+      </div>
+      <div class="card">
+        <div class="ct">По категориям</div>
+        <div id="r-cats"><div class="empty">Нет данных</div></div>
+      </div>
+      <div id="r-journal"></div>
+    </div>
+
+    <!-- ══ ТОВАРЫ ══ -->
+    <div class="sec" id="s-prod">
+
+      <!-- Кнопка и форма добавления — СВЕРХУ -->
+      <button class="btn btn-outline" onclick="toggleAddForm()" style="margin-bottom:12px">+ Добавить товар</button>
+      <div class="add-prod-panel" id="add-form">
+        <div class="add-prod-title">Новый товар</div>
+        <div class="fg">
+          <label class="fl">Наименование</label>
+          <input type="text" id="np-name" placeholder="Название товара">
+        </div>
+        <div class="fr">
+          <div class="fg">
+            <label class="fl">Категория</label>
+            <input type="text" id="np-cat" placeholder="Электроника">
+          </div>
+          <div class="fg">
+            <label class="fl">Цена продажи</label>
+            <input type="number" id="np-price" placeholder="0">
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Себестоимость</label>
+          <input type="number" id="np-cost" placeholder="0">
+        </div>
+        <button class="btn btn-primary" id="btn-save-prod">Сохранить товар</button>
+      </div>
+
+      <!-- Список товаров -->
+      <div class="card">
+        <div class="ct">База товаров</div>
+        <div id="p-list"><div class="empty">Загрузка...</div></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <nav class="nav">
+    <button class="nb on" onclick="goTab('home',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Главная
+    </button>
+    <button class="nb" onclick="goTab('sale',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Продажа
+    </button>
+    <button class="nb" onclick="goTab('rep',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Отчёт
+    </button>
+    <button class="nb" onclick="goTab('prod',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      Товары
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<div class="toast-wrap"><div class="toast" id="toast"></div></div>
+
+<script type="module">
+/* ════════════════════════════════════════════════════
+   FIREBASE CONFIG
+   Зайдите на console.firebase.google.com
+   → Project settings → Your apps → скопируйте config
+════════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey:            "AIzaSyDUmZcOgdo79BqFQjHOzl0GztdQdH3Mx-A",
+  authDomain:        "avtodos-2a8a7.firebaseapp.com",
+  databaseURL:       "https://avtodos-2a8a7-default-rtdb.firebaseio.com",
+  projectId:         "avtodos-2a8a7",
+  storageBucket:     "avtodos-2a8a7.firebasestorage.app",
+  messagingSenderId: "949297286183",
+  appId:             "1:949297286183:web:b9a28b754de7bbb1531202",
+  measurementId:     "G-M0MYHYHMT7"
+};
+/* ════════════════════════════════════════════════════ */
+
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+const DEF_PRODUCTS = [
+  {name:"Видеорегистратор DVR-X200",   cat:"Электроника",    price:3500, cost:2200},
+  {name:"Видеорегистратор DVR-Pro",    cat:"Электроника",    price:5200, cost:3400},
+  {name:"Автомобильное зарядное USB",  cat:"Электроника",    price:600,  cost:280},
+  {name:"Антирадар Cobra RX-7",        cat:"Электроника",    price:3200, cost:1900},
+  {name:"Парктроник 4 датчика",        cat:"Электроника",    price:2800, cost:1600},
+  {name:"Автомобильный освежитель",    cat:"Аксессуары",     price:250,  cost:120},
+  {name:"Солнцезащитный козырёк",      cat:"Аксессуары",     price:200,  cost:90},
+  {name:"Органайзер в багажник",       cat:"Аксессуары",     price:900,  cost:450},
+  {name:"Чехлы на сиденья (комплект)", cat:"Интерьер",       price:4800, cost:2900},
+  {name:"Коврики резиновые (4 шт)",    cat:"Интерьер",       price:1200, cost:650},
+  {name:"Накидка на руль кожаная",     cat:"Интерьер",       price:800,  cost:400},
+  {name:"Дефлекторы окон (комплект)",  cat:"Внешний тюнинг", price:1500, cost:850},
+  {name:"Спойлер универсальный",       cat:"Внешний тюнинг", price:3800, cost:2200},
+  {name:"Автомобильная аптечка",       cat:"Прочее",         price:350,  cost:150},
+  {name:"Огнетушитель автомобильный",  cat:"Прочее",         price:600,  cost:300},
+];
+
+const TRASH = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <polyline points="3 6 5 6 21 6"/>
+  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+  <path d="M10 11v6M14 11v6"/>
+</svg>`;
+
+const CART = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+</svg>`;
+
+let products = [], sales = [], selProduct = null;
+let currentUser = 'Абыл', repFilter = 'today';
+
+const fmt      = n  => Math.round(n).toLocaleString('ru-RU') + ' сом';
+const dateKey  = ts => new Date(ts).toISOString().slice(0,10);
+const todayKey = () => new Date().toISOString().slice(0,10);
+const isToday  = ts => dateKey(ts) === todayKey();
+
+// ── Firebase слушатели ──────────────────────────
+function startListeners() {
+  onValue(ref(db,'products'), snap => {
+    const d = snap.val();
+    products = d ? Object.entries(d).map(([id,v])=>({id,...v})) : [];
+    if (!d) DEF_PRODUCTS.forEach(p => push(ref(db,'products'), p));
+    renderProducts();
+  });
+  onValue(ref(db,'sales'), snap => {
+    const d = snap.val();
+    sales = d ? Object.entries(d).map(([id,v])=>({id,...v})) : [];
+    renderHome();
+    if (document.getElementById('s-rep').classList.contains('on')) renderReport();
+  });
+}
+
+// ── Навигация ───────────────────────────────────
+window.goTab = (name, btn) => {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  document.getElementById('s-' + name).classList.add('on');
+  btn.classList.add('on');
+  if (name === 'rep') renderReport();
+};
+
+window.setUser = (name, btn) => {
+  currentUser = name;
+  document.querySelectorAll('.user-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+};
+
+window.syncNow = () => {
+  const b = document.getElementById('sync-btn');
+  b.style.opacity = '.5';
+  setTimeout(() => { b.style.opacity = '1'; showToast('Данные обновлены'); }, 700);
+};
+
+// ── Фильтр отчёта ───────────────────────────────
+window.setFilter = (f, btn) => {
+  repFilter = f;
+  document.querySelectorAll('.fb-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderReport();
+};
+
+function filtered() {
+  const now = Date.now();
+  if (repFilter === 'today') return sales.filter(s => isToday(s.ts));
+  if (repFilter === 'week')  return sales.filter(s => now - s.ts < 7  * 864e5);
+  if (repFilter === 'month') return sales.filter(s => now - s.ts < 30 * 864e5);
+  return [...sales];
+}
+
+// ── Автодополнение ──────────────────────────────
+window.onSearch = () => {
+  const q    = document.getElementById('f-search').value.trim().toLowerCase();
+  const list = document.getElementById('ac-list');
+  if (!q) { list.classList.remove('show'); return; }
+  const hits = products.filter(p => p.name.toLowerCase().includes(q)).slice(0, 7);
+  if (!hits.length) { list.classList.remove('show'); return; }
+  list.innerHTML = hits.map(p => {
+    const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const hi  = p.name.replace(new RegExp('(' + esc + ')', 'gi'), '<strong>$1</strong>');
+    return `<div class="ac-item" onclick="pickProduct('${p.id}')">
+      ${hi}<div class="ac-sub">${p.cat} · ${fmt(p.price)}</div>
+    </div>`;
+  }).join('');
+  list.classList.add('show');
+};
+
+window.pickProduct = id => {
+  selProduct = products.find(p => p.id === id);
+  if (!selProduct) return;
+  document.getElementById('f-search').value = selProduct.name;
+  document.getElementById('f-price').value  = selProduct.price;
+  document.getElementById('f-cost').value   = selProduct.cost;
+  document.getElementById('f-disc').value   = '';
+  document.getElementById('ac-list').classList.remove('show');
+  calcPreview();
+};
+
+window.calcPreview = () => {
+  if (!selProduct) return;
+  const qty  = parseFloat(document.getElementById('f-qty').value)  || 1;
+  const disc = parseFloat(document.getElementById('f-disc').value) || 0;
+  const sp   = disc > 0 ? disc : selProduct.price;
+  document.getElementById('f-prev').textContent = fmt(qty * (sp - selProduct.cost));
+};
+
+// ── Добавить продажу ────────────────────────────
+window.addSale = async () => {
+  if (!selProduct) { showToast('Выберите товар из списка'); return; }
+  const qty  = parseFloat(document.getElementById('f-qty').value)  || 1;
+  const disc = parseFloat(document.getElementById('f-disc').value) || 0;
+  const sp   = disc > 0 ? disc : selProduct.price;
+  await push(ref(db, 'sales'), {
+    name: selProduct.name, cat: selProduct.cat,
+    qty, price: selProduct.price, salePrice: sp,
+    cost: selProduct.cost, profit: qty * (sp - selProduct.cost),
+    user: currentUser, ts: Date.now()
+  });
+  ['f-search','f-disc','f-price','f-cost'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-qty').value = '1';
+  document.getElementById('f-prev').textContent = '0 сом';
+  selProduct = null;
+  showToast('Продажа записана!');
+};
+
+// ── Удалить продажу ─────────────────────────────
+window.delSale = async id => {
+  if (!confirm('Удалить эту продажу?')) return;
+  await remove(ref(db, 'sales/' + id));
+  showToast('Продажа удалена');
+};
+
+// ── Главная ─────────────────────────────────────
+function renderHome() {
+  const td   = sales.filter(s => isToday(s.ts));
+  const rev  = td.reduce((a, s) => a + s.qty * s.salePrice, 0);
+  const prof = td.reduce((a, s) => a + s.profit, 0);
+  document.getElementById('h-rev').textContent    = fmt(rev);
+  document.getElementById('h-profit').textContent = fmt(prof);
+  document.getElementById('h-cnt').textContent    = td.length;
+  document.getElementById('h-margin').textContent = rev > 0 ? Math.round(prof / rev * 100) + '%' : '0%';
+
+  const el = document.getElementById('recent-list');
+  if (!sales.length) { el.innerHTML = '<div class="empty">Нет продаж</div>'; return; }
+  el.innerHTML = [...sales].sort((a,b) => b.ts - a.ts).slice(0, 6).map(s => `
+    <div class="row">
+      <div class="ico">${CART}</div>
+      <div class="rinfo">
+        <div class="rname">${s.name}</div>
+        <div class="rmeta">${s.qty} шт · ${s.user} · ${new Date(s.ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+      <div class="rright">
+        <div class="rprice">${fmt(s.qty * s.salePrice)}</div>
+        <div class="rprofit">+${fmt(s.profit)}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Отчёт ───────────────────────────────────────
+function renderReport() {
+  const td   = filtered();
+  const rev  = td.reduce((a, s) => a + s.qty * s.salePrice, 0);
+  const prof = td.reduce((a, s) => a + s.profit, 0);
+  document.getElementById('r-rev').textContent  = fmt(rev);
+  document.getElementById('r-prof').textContent = fmt(prof);
+
+  // По продавцам
+  const sellers = {};
+  td.forEach(s => {
+    if (!sellers[s.user]) sellers[s.user] = {rev:0, prof:0, cnt:0};
+    sellers[s.user].rev  += s.qty * s.salePrice;
+    sellers[s.user].prof += s.profit;
+    sellers[s.user].cnt++;
+  });
+  document.getElementById('r-sellers').innerHTML = Object.keys(sellers).length
+    ? Object.entries(sellers).map(([u,v]) => `
+        <div class="row">
+          <div class="rinfo">
+            <div class="rname">${u}</div>
+            <div class="rmeta">${v.cnt} продаж · ${fmt(v.rev)}</div>
+          </div>
+          <div class="rright"><div class="rprofit">+${fmt(v.prof)}</div></div>
+        </div>`).join('')
+    : '<div class="empty">Нет данных</div>';
+
+  // По категориям
+  const cats = {};
+  td.forEach(s => {
+    if (!cats[s.cat]) cats[s.cat] = {rev:0, prof:0};
+    cats[s.cat].rev  += s.qty * s.salePrice;
+    cats[s.cat].prof += s.profit;
+  });
+  document.getElementById('r-cats').innerHTML = Object.keys(cats).length
+    ? Object.entries(cats).map(([c,v]) => `
+        <div class="row">
+          <div class="rinfo"><div class="rname">${c}</div></div>
+          <div class="rright">
+            <div class="rprice">${fmt(v.rev)}</div>
+            <div class="rprofit">+${fmt(v.prof)}</div>
+          </div>
+        </div>`).join('')
+    : '<div class="empty">Нет данных</div>';
+
+  // Журнал по датам
+  const byDate = {};
+  td.forEach(s => {
+    const dk = dateKey(s.ts);
+    if (!byDate[dk]) byDate[dk] = [];
+    byDate[dk].push(s);
+  });
+  const dates = Object.keys(byDate).sort((a,b) => b.localeCompare(a));
+  const jEl   = document.getElementById('r-journal');
+  if (!dates.length) { jEl.innerHTML = ''; return; }
+
+  jEl.innerHTML = dates.map((dk, i) => {
+    const ds   = byDate[dk].sort((a,b) => b.ts - a.ts);
+    const drev = ds.reduce((a,s) => a + s.qty * s.salePrice, 0);
+    const dpro = ds.reduce((a,s) => a + s.profit, 0);
+    const dlbl = new Date(dk + 'T12:00:00').toLocaleDateString('ru-RU', {weekday:'short', day:'numeric', month:'long'});
+    const bid  = 'db' + dk.replace(/-/g, '');
+    return `
+      <div class="date-block">
+        <div class="date-hdr" onclick="toggleDay('${bid}')">
+          <div class="date-hdr-l">${dlbl}</div>
+          <div class="date-hdr-r">${ds.length} продаж · ${fmt(drev)}</div>
+        </div>
+        <div class="date-body ${i === 0 ? 'open' : ''}" id="${bid}">
+          <div class="date-stats">
+            <div class="ds"><div class="ds-l">Выручка</div><div class="ds-v blue">${fmt(drev)}</div></div>
+            <div class="ds"><div class="ds-l">Прибыль</div><div class="ds-v green">${fmt(dpro)}</div></div>
+            <div class="ds"><div class="ds-l">Маржа</div><div class="ds-v">${drev > 0 ? Math.round(dpro/drev*100) : 0}%</div></div>
+          </div>
+          ${ds.map(s => `
+            <div class="ds-row">
+              <div class="ds-info">
+                <div class="ds-name">${s.name}</div>
+                <div class="ds-meta">${s.user} · ${s.qty} шт · ${new Date(s.ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</div>
+              </div>
+              <div class="ds-right">
+                <div class="ds-price">${fmt(s.qty * s.salePrice)}</div>
+                <div class="ds-profit">+${fmt(s.profit)}</div>
+              </div>
+              <button class="del-btn" onclick="delSale('${s.id}')">${TRASH}</button>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+window.toggleDay = id => document.getElementById(id).classList.toggle('open');
+
+// ── Товары ──────────────────────────────────────
+function renderProducts() {
+  document.getElementById('p-list').innerHTML = products.length
+    ? products.map(p => `
+        <div class="row">
+          <div class="rinfo">
+            <div class="rname">${p.name}</div>
+            <div class="rmeta"><span class="badge">${p.cat}</span></div>
+          </div>
+          <div class="rright" style="margin-right:4px">
+            <div class="rprice">${fmt(p.price)}</div>
+            <div style="font-size:11px;color:var(--t2)">себ. ${fmt(p.cost)}</div>
+          </div>
+          <button class="del-btn" onclick="delProduct('${p.id}')">${TRASH}</button>
+        </div>`).join('')
+    : '<div class="empty">Нет товаров</div>';
+}
+
+window.delProduct = async id => {
+  if (!confirm('Удалить товар из базы?')) return;
+  await remove(ref(db, 'products/' + id));
+  showToast('Товар удалён');
+};
+
+window.toggleAddForm = () => {
+  const panel = document.getElementById('add-form');
+  panel.classList.toggle('show');
+  if (panel.classList.contains('show')) {
+    setTimeout(() => document.getElementById('np-name').focus(), 100);
+  }
+};
+
+// ── Сохранить товар ─────────────────────────────
+document.getElementById('btn-save-prod').addEventListener('click', async () => {
+  const n  = document.getElementById('np-name').value.trim();
+  const c  = document.getElementById('np-cat').value.trim();
+  const p  = parseFloat(document.getElementById('np-price').value) || 0;
+  const co = parseFloat(document.getElementById('np-cost').value)  || 0;
+  if (!n) { showToast('Введите название товара'); return; }
+  await push(ref(db, 'products'), {name: n, cat: c || 'Прочее', price: p, cost: co});
+  ['np-name','np-cat','np-price','np-cost'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('add-form').classList.remove('show');
+  showToast('Товар добавлен!');
+});
+
+// ── Toast ────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── Закрыть автодополнение при клике вне ────────
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ac-wrap')) document.getElementById('ac-list').classList.remove('show');
+});
+
+// ── Дата в шапке ────────────────────────────────
+document.getElementById('today-label').textContent =
+  new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
+
+startListeners();
+</script>
+</body>
+</html>
