@@ -380,13 +380,20 @@ async function tgNotify(sale){
   const time=new Date(sale.ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Bishkek'});
   const date=new Date(sale.ts).toLocaleDateString('ru-RU',{day:'numeric',month:'long',timeZone:'Asia/Bishkek'});
   const discount=sale.salePrice!==sale.price?' (со скидкой)':'';
+  // Итоги за сегодня включая эту продажу
+  const todaySales=sales.filter(s=>isToday(s.ts));
+  const dayRev=todaySales.reduce((a,s)=>a+s.qty*s.salePrice,0);
+  const dayProf=todaySales.reduce((a,s)=>a+s.profit,0);
   const msg=`🛍 <b>Новая продажа</b>\n`+
     `📅 ${date}, ${time}\n`+
     `👤 Продавец: ${sale.user}\n`+
     `📦 Товар: ${sale.name}\n`+
     `🔢 Кол-во: ${sale.qty} шт\n`+
     `💰 Цена: ${Math.round(sale.salePrice).toLocaleString('ru-RU')} сом${discount}\n`+
-    `✅ Прибыль: +${Math.round(sale.profit).toLocaleString('ru-RU')} сом`;
+    `✅ Прибыль: +${Math.round(sale.profit).toLocaleString('ru-RU')} сом\n`+
+    `\n📊 <b>Итого за сегодня (${todaySales.length} прод.)</b>\n`+
+    `💵 Выручка: ${Math.round(dayRev).toLocaleString('ru-RU')} сом\n`+
+    `📈 Прибыль: ${Math.round(dayProf).toLocaleString('ru-RU')} сом`;
   try{
     await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
       method:'POST',
