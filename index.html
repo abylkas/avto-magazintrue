@@ -374,12 +374,36 @@ window.calcPreview=()=>{
 };
 
 // ДОБАВИТЬ ПРОДАЖУ
+const TG_TOKEN='8709060131:AAFQpQ0K0JoRA60ffTBuZu3PJbzwFfLuQXM';
+const TG_CHAT='-5240546361';
+async function tgNotify(sale){
+  const time=new Date(sale.ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Bishkek'});
+  const date=new Date(sale.ts).toLocaleDateString('ru-RU',{day:'numeric',month:'long',timeZone:'Asia/Bishkek'});
+  const discount=sale.salePrice!==sale.price?' (со скидкой)':'';
+  const msg=`🛍 <b>Новая продажа</b>\n`+
+    `📅 ${date}, ${time}\n`+
+    `👤 Продавец: ${sale.user}\n`+
+    `📦 Товар: ${sale.name}\n`+
+    `🔢 Кол-во: ${sale.qty} шт\n`+
+    `💰 Цена: ${Math.round(sale.salePrice).toLocaleString('ru-RU')} сом${discount}\n`+
+    `✅ Прибыль: +${Math.round(sale.profit).toLocaleString('ru-RU')} сом`;
+  try{
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:'HTML'})
+    });
+  }catch(e){console.log('TG error:',e);}
+}
+
 window.addSale=async()=>{
   if(!selProduct){showToast('Выберите товар из списка');return;}
   const qty=parseFloat(document.getElementById('f-qty').value)||1;
   const disc=parseFloat(document.getElementById('f-disc').value)||0;
   const sp=disc>0?disc:selProduct.price;
-  await push(ref(db,'sales'),{name:selProduct.name,cat:selProduct.cat,qty,price:selProduct.price,salePrice:sp,cost:selProduct.cost,profit:qty*(sp-selProduct.cost),user:currentUser,ts:Date.now()});
+  const sale={name:selProduct.name,cat:selProduct.cat,qty,price:selProduct.price,salePrice:sp,cost:selProduct.cost,profit:qty*(sp-selProduct.cost),user:currentUser,ts:Date.now()};
+  await push(ref(db,'sales'),sale);
+  tgNotify(sale);
   ['f-search','f-disc','f-price','f-cost'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-qty').value='1';
   document.getElementById('f-prev').textContent='0 сом';
